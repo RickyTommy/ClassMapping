@@ -9,6 +9,18 @@ class PSUBS4Scraping():
         self.department = department                                            #optional to scrape only certain departments
         self.site_list = []
 
+        self.dickinson_law_class_list = []                                      #these are bulletin pages with respective classes listed
+        self.graduate_class_list = [] 
+        self.undergraduate_class_list = []
+        self.medicine_class_list = []
+        self.penn_state__law_class_list = []
+
+        self.dickinson_law_list = []                                            #these are bulletin pages with program requirements
+        self.graduate_list = [] 
+        self.undergraduate_list = []
+        self.medicine_list = []
+        self.penn_state__law_list = []
+
     def parse_site(self, site=None):
         if site == None:
             site = self.sitemap_url
