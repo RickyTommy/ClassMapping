@@ -101,3 +101,8 @@ class PSUBS4Scraping():
         for url in self.graduate_list:
             print(url)
         
+    def test_print_last_ug_desc(self):
+        if len(self.undergraduate_class_list) > 0:
+            print(self.undergraduate_class_list[-1])
+        else:
+            print("list is empty") 
