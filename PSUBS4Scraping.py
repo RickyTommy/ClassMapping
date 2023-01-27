@@ -4,7 +4,9 @@ from bs4 import BeautifulSoup
 class PSUBS4Scraping():
 
     def __init__(self):
-        self.sitemap_url = "https://bulletins.psu.edu/sitemap.xml"              #this is the overall bulletin sitemap
+        #self.sitemap_url = "https://bulletins.psu.edu/sitemap.xml"              #this is the overall bulletin sitemap
+        page = requests.get("https://bulletins.psu.edu/sitemap.xml")            #this is the overall bulletin sitemap
+        self.site_map = BeautifulSoup(page.content, 'xml')          #we assume xml site because the PSU bulletin sitemap is xml and default for this method
         self.site_list = []
 
         self.main_class_list = []                                               #these are bulletin pages with respective classes listed
@@ -23,9 +25,7 @@ class PSUBS4Scraping():
 
     #this method parses the sitemap and segements class lists by grad, undergrad, etc. 
     def parse_site_map(self):                                                   #this parses by department, if we need to parse by campus later this is also a good place
-        page = requests.get(self.sitemap_url)
-        site_map = BeautifulSoup(page.content, 'xml')                           #we assume xml site because the PSU bulletin sitemap is xml and default for this method
-        department_URL_Result_Set = site_map.find_all('loc')
+        department_URL_Result_Set = self.site_map.find_all('loc')
         department_URL = [url.string for url in department_URL_Result_Set]      #BS ResultSet doesn't allow for as easy parsing, cast to string
         for url in department_URL:
             url = url.strip("<loc>")
@@ -69,19 +69,26 @@ class PSUBS4Scraping():
         return department_URL                                                   #returns list of strings that are exact URL's
 
     def scrape_department_classes(self, department="all"):
-        deparment = deparment.lower()               
+        department = department.lower()               
         if department == "all":
             department = self.main_class_list
         elif department == "undergaduate":
             department = self.undergraduate_class_list
         elif department == "graduate":
-            deparment = self.graduate_class_list
+            department = self.graduate_class_list
         elif department == "medicine":
             department = self.medicine_class_list
         elif department == "dickinsonlaw":
-            deparment = self.dickinson_law_class_list
-        elif deparment == "pennstatelaw":
-            deparment = self.penn_state_law_class_list
+            department = self.dickinson_law_class_list
+        elif department == "pennstatelaw":
+            department = self.penn_state_law_class_list
+        content = {}                                                                 #TEMPORARY WAY OF STORING PAGE INFO, REPLACE WITH "COURSEINFO" CLASS
+        table = self.site_map.find('div', attrs = {'class' : 'sc_sccoursedescs'})
+
+        for row in table.find_all_next('div', attrs = {'class' : 'courseblock'}):
+            content['coursecode'] = row.find('div', attrs = {'class' : 'course_codetitle'})
+            content['coursedesc'] = row.find('div', attrs = {'class' : 'courseblockdesc'})
+        return content
 
     def test_print_all_urls(self):                                              #dev tool
         self.site_list = self.parse_site(None)
